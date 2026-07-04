@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: interview-analyzer-postgres
+    environment:
+      POSTGRES_DB: interview_analyzer
+      POSTGRES_USER: interview_app
+      POSTGRES_PASSWORD: interview_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U interview_app -d interview_analyzer"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    container_name: interview-analyzer-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8080
+      DATABASE_URL: jdbc:postgresql://postgres:5432/interview_analyzer
+      DATABASE_USERNAME: interview_app
+      DATABASE_PASSWORD: interview_app
+      JWT_SECRET: replace-this-development-secret-with-64-plus-characters-for-local-compose
+      AI_SERVICE_BASE_URL: http://ai-service:5000
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
