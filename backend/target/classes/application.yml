@@ -1,42 +1,53 @@
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:8080}
 
   error:
     include-message: always
     include-binding-errors: always
-    include-stacktrace: always
-    include-exception: true  
+    include-stacktrace: never
+    include-exception: false
 
 spring:
   application:
-    name: interview_ai
+    name: interview-ai
+
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/interview_analyzer}
     username: ${DATABASE_USERNAME:postgres}
     password: ${DATABASE_PASSWORD:5432}
+    driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
     open-in-view: false
+
     properties:
       hibernate:
         default_schema: public
-        format_sql: true
+        format_sql: false
+
   flyway:
-    enabled: true
+    enabled: ${FLYWAY_ENABLED:false}
+    baseline-on-migrate: true
 
 app:
   security:
-    jwt-secret: ${JWT_SECRET:replace-this-development-secret-with-64-plus-characters}
+    jwt-secret: ${JWT_SECRET:replace-this-development-secret-with-64-plus-characters-long}
     jwt-expiration-minutes: ${JWT_EXPIRATION_MINUTES:1440}
+
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+
   ai-service:
     base-url: ${AI_SERVICE_BASE_URL:http://localhost:5000}
+
 management:
   endpoints:
     web:
       exposure:
         include: health,info
 
-        
+  endpoint:
+    health:
+      show-details: always
